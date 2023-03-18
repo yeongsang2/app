@@ -12,6 +12,7 @@ RUN apt-get install -y python3-distutils
 # RUN pip install --upgrade pip
 RUN pip install -r /user/app/requirements.txt
 # RUN pip install -r /app/yolov5/requirements.txt
+RUN sed -i 's/numpy.asscalar(delta_e)/delta_e.item()/g' /usr/local/lib/python3.9/site-packages/colormath/color_diff.py
 
 WORKDIR /user/app
 
