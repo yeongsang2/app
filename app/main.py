@@ -23,10 +23,6 @@ def read_root():
 @app.post("/clothes-classify")
 async def detect_clothes_return_json_result(file: bytes = File(...)):
 
-    filename = f"{str(uuid.uuid4())}.jpg" 
-    with open(os.path.join(UPLOAD_DIR, filename), "wb") as fp:
-        fp.write(file)
-
     color = get_color(file)
     logo = get_logo(file)
 
