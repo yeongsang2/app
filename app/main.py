@@ -27,7 +27,7 @@ async def detect_clothes_return_json_result(file: bytes = File(...)):
     logo = get_logo(file)
 
     result = {'logo': logo, 'color': color}
-    return {"result": result}
+    return result
 
 def get_yolov5():
     model = torch.hub.load('/user/app/yolov5', 'custom', path='/user/app/yolov5/north.pt', source='local')
