@@ -4,13 +4,13 @@ import numpy as np
 import cv2
 from sklearn.cluster import KMeans
 import sys
-sys.path.append('/user/app/color_classification')
-from lab_converter import ColorConverter
+from .lab_converter import ColorConverter
 
 
 
 def execute(img_path, q):
-    converter = ColorConverter('/user/app/color_classification/final_color_list_demo.txt')
+    # converter = ColorConverter('/Users/kim-yeongsang/Desktop/app/resource/final_color_list_demo.txt')
+    converter = ColorConverter('/user/app/resource/final_color_list_demo.txt')
     # 이미지 로드
     # image = cv2.imread(img_path)  # test image
     print(img_path)

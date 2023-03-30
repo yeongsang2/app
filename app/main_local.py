@@ -12,14 +12,13 @@ from color_classification import color
 from torchvision import models, transforms
 import torch.nn as nn
 
-
+UPLOAD_DIR = "/Users/kim-yeongsang/Desktop/app/image/"  # 이미지를 저장할 서버 경로
 app = FastAPI()
-UPLOAD_DIR = "/user/app/image/"  # 이미지를 저장할 서버 경로
 device = torch.device('cpu')
 
 @app.get("/")
 def read_root():
-    return {"ping"}
+    return {"Hello": "World"}
 
 @app.post("/clothes-classify")
 async def detect_clothes_return_json_result(file: bytes = File(...)):
@@ -33,7 +32,7 @@ async def detect_clothes_return_json_result(file: bytes = File(...)):
 
 
 def get_yolov5():
-    model = torch.hub.load('/user/app/yolov5', 'custom', path='/user/app/resource/north.pt', source='local')
+    model = torch.hub.load('/Users/kim-yeongsang/Desktop/app/yolov5', 'custom', path='/Users/kim-yeongsang/Desktop/app/resource/north.pt', source='local')
     model.conf = 0.5
     return model
 
@@ -47,6 +46,7 @@ def get_image_from_bytes(binary_image, max_size=1024):
         int(input_image.height * resize_factor)
     ))
     return resized_image
+
 
 def get_logo(file):
 
@@ -73,7 +73,7 @@ def get_color(file):
 
 def get_pattern(file):
 
-    with open("/user/app/resource/pattern.txt", 'r') as f:
+    with open("/Users/kim-yeongsang/Desktop/app/resource/pattern.txt", 'r') as f:
         class_names = [line.strip() for line in f]
     # get model
     model = get_resnet18()
@@ -95,7 +95,7 @@ def get_resnet18():
     num_ftrs = model.fc.in_features
     model.fc = nn.Linear(num_ftrs, 4)
     
-    model.load_state_dict(torch.load('/user/app/resource/pattern.pt', map_location='cpu'))
+    model.load_state_dict(torch.load('/Users/kim-yeongsang/Desktop/app/resource/pattern.pt', map_location='cpu'))
 
     model.eval()
     model.to(device)
