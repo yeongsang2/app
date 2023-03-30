@@ -8,7 +8,7 @@
 git clone https://github.com/yeongsang2/app.git
 cd app
 ```
-* /app/yolov5에 xxxx.pt 저장
+* /app/resource 에 .pt file 저장
 
 ## Usage
 * 도커 이미지 빌드
@@ -27,9 +27,18 @@ ping
 
 ### API Endpoint
 * /clothes-classify
-    * form-data(multipart/form-data)
-    * key: file | value: image
+    * request
+        * form-data(multipart/form-data)
+        * key: file | value: image
+    * respones<br>
 
+            {
+                "logo": "nike",
+                "color": "탁한 초록색 48퍼, 검정색 45퍼,",
+                "pattern": "스트라이프무늬"
+            }
+                
 
 ### reference
 * https://github.com/ultralytics/yolov5
+* https://github.com/pytorch/tutorials
