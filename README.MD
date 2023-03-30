@@ -8,7 +8,11 @@
 git clone https://github.com/yeongsang2/app.git
 cd app
 ```
-* /app/resource 에 .pt file 저장
+## Download
+* https://drive.google.com/file/d/1a8cCUyyHKn7MHTWRxdc5fUP5UzBLETcM/view?usp=share_link
+* https://drive.google.com/file/d/1W69rCGWimN4cQs_PuQqoak1UFmWCXEz7/view?usp=share_link
+
+/resource 에 .pt file 저장
 
 ## Usage
 * 도커 이미지 빌드
