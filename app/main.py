@@ -2,8 +2,9 @@ import json
 import uuid
 from PIL import Image
 from click import File
-from fastapi import FastAPI, File
+from fastapi import FastAPI, File, HTTPException
 import io
+from io import BytesIO
 import torch
 from torch import device
 import os
@@ -11,7 +12,7 @@ from queue import Queue
 from color_classification import color
 from torchvision import models, transforms
 import torch.nn as nn
-
+import time
 
 app = FastAPI()
 UPLOAD_DIR = "/user/app/image/"  # 이미지를 저장할 서버 경로
@@ -24,13 +25,15 @@ def read_root():
 @app.post("/clothes-classify")
 async def detect_clothes_return_json_result(file: bytes = File(...)):
     
+    
+    check_image_exist(file)
+    
     color = get_color(file)
     logo = get_logo(file)
     pattern = get_pattern(file)
 
     result = {'logo': logo, 'color': color, 'pattern': pattern}
     return result
-
 
 def get_yolov5():
     model = torch.hub.load('/user/app/yolov5', 'custom', path='/user/app/resource/north.pt', source='local')
@@ -113,3 +116,11 @@ def preprocess(file):
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     ])
     return transform(image).unsqueeze(0)
+
+def check_image_exist(file):
+    try:
+        image = Image.open(BytesIO(file))
+    except Exception:
+        raise HTTPException(status_code=404, detail="Invalid image file")
+    
+    return True
