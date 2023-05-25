@@ -9,3 +9,5 @@ __pycache__/
 testvenv
 testvenv/*
 *.png
+.DS_Store
+app/main_local.py

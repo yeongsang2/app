@@ -11,24 +11,65 @@ from queue import Queue
 from color_classification import color
 from torchvision import models, transforms
 import torch.nn as nn
+import asyncio
+import time
 
-UPLOAD_DIR = "/Users/kim-yeongsang/Desktop/app/image/"  # 이미지를 저장할 서버 경로
 app = FastAPI()
+UPLOAD_DIR = "/Users/kim-yeongsang/Desktop/app/image/"  # 이미지를 저장할 서버 경로
 device = torch.device('cpu')
 
 @app.get("/")
 def read_root():
-    return {"Hello": "World"}
+    return {"ping"}
 
 @app.post("/clothes-classify")
 async def detect_clothes_return_json_result(file: bytes = File(...)):
     
-    color = get_color(file)
-    logo = get_logo(file)
-    pattern = get_pattern(file)
+    # print(f"async started at {time.strftime('%X')}")
+    start_time = time.time()
 
+
+    color_time_s = time.time()
+    color = asyncio.create_task(get_color(file))
+    color = await color
+    color_time_f = time.time()
+
+    print(f"color time: {color_time_f - color_time_s:.3f} seconds")
+
+
+    logo_time_s = time.time()
+    logo = asyncio.create_task(get_logo(file))
+    logo = await logo
+    logo_time_f = time.time()
+    print(f"logo time: {logo_time_f - logo_time_s:.3f} seconds")
+
+    pattern_time_s = time.time()
+    pattern = asyncio.create_task(get_pattern(file))
+    pattern = await pattern
+    pattern_time_f = time.time()
+    print(f"pattern time: {pattern_time_f - pattern_time_s:.3f} seconds")
+    
+    # color = await color
+    # logo = await logo
+    # pattern = await pattern
+    # print(f"async finished at {time.strftime('%X')}")
+    end_time = time.time()
+    print(f"Elapsed time: {end_time - start_time:.3f} seconds")
     result = {'logo': logo, 'color': color, 'pattern': pattern}
     return result
+
+
+# @app.post("/clothes-classify/v2")
+# async def detect_clothes_return_json_resultv2(file: bytes = File(...)):
+    
+#     print(f"started at {time.strftime('%X')}")
+#     color = get_color(file)
+#     logo = get_logo(file)
+#     pattern = get_pattern(file)
+
+#     print(f"finished at {time.strftime('%X')}")
+#     result = {'logo': logo, 'color': color, 'pattern': pattern}
+#     return result
 
 
 def get_yolov5():
@@ -37,7 +78,6 @@ def get_yolov5():
     return model
 
 def get_image_from_bytes(binary_image, max_size=1024):
-    print('test')
     input_image =Image.open(io.BytesIO(binary_image)).convert("RGB")
     width, height = input_image.size
     resize_factor = min(max_size / width, max_size / height)
@@ -47,8 +87,7 @@ def get_image_from_bytes(binary_image, max_size=1024):
     ))
     return resized_image
 
-
-def get_logo(file):
+async def get_logo(file):
 
     input_image = get_image_from_bytes(file)
     model = get_yolov5()
@@ -61,7 +100,7 @@ def get_logo(file):
     return
             
 
-def get_color(file):
+async def get_color(file):
 
     filename = f"{str(uuid.uuid4())}.jpg" 
     with open(os.path.join(UPLOAD_DIR, filename), "wb") as fp:
@@ -71,7 +110,7 @@ def get_color(file):
     que = color.execute(UPLOAD_DIR + filename, que)
     return que.get()
 
-def get_pattern(file):
+async def get_pattern(file):
 
     with open("/Users/kim-yeongsang/Desktop/app/resource/pattern.txt", 'r') as f:
         class_names = [line.strip() for line in f]
