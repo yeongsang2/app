@@ -13,6 +13,8 @@ from color_classification import color
 from torchvision import models, transforms
 import torch.nn as nn
 import time
+import requests
+
 
 app = FastAPI()
 UPLOAD_DIR = "/user/app/image/"  # 이미지를 저장할 서버 경로
@@ -32,7 +34,10 @@ async def detect_clothes_return_json_result(file: bytes = File(...)):
     logo = get_logo(file)
     pattern = get_pattern(file)
 
-    result = {'logo': logo, 'color': color, 'pattern': pattern}
+    type_url = "http://app2:8081/clothes-type"
+    data = requests.post(type_url, files={"file": file}).json()
+    predicted_class = data["type"]
+    result = {'logo': logo, 'color': color, 'pattern': pattern, 'type' : predicted_class}
     return result
 
 def get_yolov5():
