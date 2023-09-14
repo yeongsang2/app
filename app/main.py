@@ -2,7 +2,7 @@ import json
 import uuid
 from PIL import Image
 from click import File
-from fastapi import FastAPI, File, HTTPException
+from fastapi import FastAPI, File, HTTPException, Form
 import io
 from io import BytesIO
 import torch
@@ -14,18 +14,23 @@ from torchvision import models, transforms
 import torch.nn as nn
 import time
 import requests
+from .call_openai import request_openai
+from .search_servcie import get_previous_searched_clothes_in_redis, add_clothes_to_list
+
 
 
 app = FastAPI()
 UPLOAD_DIR = "/user/app/image/"  # 이미지를 저장할 서버 경로
-device = torch.device('cpu')
+device = torch.device('cuda')
+
+previous_searched_clothes = []
 
 @app.get("/")
 def read_root():
     return {"ping"}
 
 @app.post("/clothes-classify")
-async def detect_clothes_return_json_result(file: bytes = File(...)):
+async def detect_clothes_return_json_result(file: bytes = File(...), tag: str = Form(...)):
     
     
     check_image_exist(file)
@@ -37,8 +42,16 @@ async def detect_clothes_return_json_result(file: bytes = File(...)):
     type_url = "http://app2:8081/clothes-type"
     data = requests.post(type_url, files={"file": file}).json()
     predicted_class = data["type"]
+
     result = {'logo': logo, 'color': color, 'pattern': pattern, 'type' : predicted_class}
-    return result
+
+    #get searched clothes
+    previous_searched_clothes = get_previous_searched_clothes_in_redis(tag)
+
+    ## add
+    add_clothes_to_list(tag, result)
+    output = request_openai(previous_searched_clothes, result)
+    return output
 
 def get_yolov5():
     model = torch.hub.load('/user/app/yolov5', 'custom', path='/user/app/resource/north.pt', source='local')
