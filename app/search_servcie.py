@@ -5,13 +5,12 @@ redis_client = redis.StrictRedis(host='redis', port=6379, db=0)
 
 def get_previous_searched_clothes_in_redis(tag) -> list:
 
-    if not redis_client.exists(tag):
-        return []
-        
-    data = redis_client.lrange(tag, 0, -1)
-    result_list = [json.loads(item) for item in data]
+    if redis_client.exists(tag):
+        data = redis_client.lrange(tag, 0, -1)
+        result_list = [json.loads(item) for item in data]
+        return result_list
 
-    return result_list
+    return []
 
 
 def add_clothes_to_list(tag, result):
